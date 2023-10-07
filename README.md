@@ -130,10 +130,10 @@ If a winning move is found, it returns that move.
 
 	SWITCH currentPlayer
 
-`WHILE True:
-	CALL fillInBoard
-	DISPLAY board
-	PROMPT user to play again`
+	WHILE True:
+		CALL fillInBoard
+		DISPLAY board
+		PROMPT user to play again
 	
 	IF user choose not to play again:
 		BREAK
@@ -168,5 +168,6 @@ The condition in this game is checking the status of the game:
 			move to the center
 		else:
 			move to the side. 
+
 
 	
