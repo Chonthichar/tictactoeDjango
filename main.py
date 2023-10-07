@@ -1,4 +1,4 @@
-# Set up The Game Board and repeat until the game dance.
+# Set up The Game Board and repeat until the game display.
 import random
 board = ['', '', '', '', '', '', '', '', '']
 
