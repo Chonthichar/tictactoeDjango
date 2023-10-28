@@ -1,18 +1,17 @@
+# Import and Initialization
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivymd.uix.button import MDRaisedButton
-from kivymd.uix.label import MDLabel
 import numpy as np
 import random
-from time import sleep
 from kivy.clock import Clock
-import sys
-import os
 
-# Set the window size
+# Setting up the window size
 Window.size = (400, 500)
 
+# Design the user Interface by included `KV` string inside python file. This code contains the layout description of a game.
+# It decided how the game UI will look like.
 KV = """
 BoxLayout:
     orientation: 'vertical'
@@ -27,21 +26,20 @@ BoxLayout:
     BoxLayout:
         orientation: 'horizontal'
         size_hint_y: None
-        padding: [10, 0]  # added some padding
+        padding: [10, 0] 
 
         MDBoxLayout:
             orientation: 'vertical'
-            size_hint_x: 0.2  # adjust this value to make it wider
-            # md_bg_color: [0.7, 0.9, 0.7, 1]  # some grayish color for background
+            size_hint_x: 0.2
             padding: [10, 10]
             size_hint_y: None
-            height: '30dp'  # You can adjust this value as per requirement
+            height: '30dp' 
             canvas.before:
                 Color:
                     rgba: [0,0,0,1]  # Border color
                 Line:
                     rectangle: self.x, self.y, self.width, self.height
-                    width: 1  # Adjust the border thickness here
+                    width: 1  # Boarder thickness
 
             MDLabel:
                 id: p1_score
@@ -51,27 +49,24 @@ BoxLayout:
 
         MDLabel:
             id: combined_score
-            size_hint_x: 0.2  # adjust this if needed
+            size_hint_x: 0.2 
             text: "0 - 0"
             font_size: "18sp"
             halign: 'center'
             bold: True
-            # theme_text_color: 'Custom'
-            # text_color: [1, 1, 1, 0]
 
         MDBoxLayout:
             orientation: 'vertical'
-            size_hint_x: 0.2  # adjust this value to make it wider
+            size_hint_x: 0.2  # make it wider
             size_hint_y: None
-            height: '30dp'  # You can adjust this value as per requirement
-            # md_bg_color: [0.7, 0.9, 0.7, 1]
+            height: '30dp'  
             padding: [10, 10]
             canvas.before:
                 Color:
                     rgba: [0,0,0,1]  # Border color
                 Line:
                     rectangle: self.x, self.y, self.width, self.height
-                    width: 1  # Adjust the border thickness here
+                    width: 1 
 
             MDLabel:
                 id: p2_score
@@ -88,50 +83,39 @@ BoxLayout:
         width: 100
         size_hint: 1, 3
         height: 100
-        # pos_hint: {"center_x": 0.7}
         font_size: "120sp"
             
     BoxLayout:
         orientation: 'horizontal'
-        # size_hint_y: 0.2  # Adjusted this value
-        # size_hint_y: None
-        # height: '44dp'
-        Widget:  # Empty widget to act as a spacer
-            size_hint_x: 0.5  # Take up half of the horizontal space
+        Widget:  
+            size_hint_x: 0.5  
 
         MDRaisedButton:
             text: "Restart"
             on_press: app.restart_game()
             font_size: "12sp"
-        Widget:  # Empty widget to act as a spacer
-            size_hint_x: 0.5  # Take up half of the horizontal space
-            
-            # pos_hint: {"center_x": 0.5, "center_y": 0.5}
-        
+        Widget:  
+            size_hint_x: 0.5  
 """
-# https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file
-import os
 
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
 
-    return os.path.join(base_path, relative_path)
-
+# This class served as the main application and ...
 class TicTacToeApp(MDApp):
+
+    # Designs the game appearance.
     def build(self):
         # self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "BlueGray"
         return Builder.load_string(KV)
 
+    # This class will be called when the app start and popped up the game parameters, like the game board and current player.
     def on_start(self):
         self.board = np.zeros((3, 3), dtype=int)
         self.win_list = []
         self.current_player = 1  # Initialize the current player to 1
         self.new_game()
 
+    # This class is called to set up the new game by clearing the grid and add fresh button to it.
     def new_game(self):
         self.board = np.zeros((3, 3), dtype=int)
         self.root.ids.grid.clear_widgets()
@@ -139,17 +123,16 @@ class TicTacToeApp(MDApp):
             for j in range(3):
                 button = MDRaisedButton(text="", disabled=True, size=(120, 120), size_hint=(10, 9), font_size="40sp")
                 button.i, button.j = i, j
-                # button.md_bg_color = [1, 1, 1, 1]  # Reset the button color to default
                 self.root.ids.grid.add_widget(button)
         self.root.ids.status_label.text = "Starting game!"
         Clock.schedule_once(lambda dt: self.play_game(), 2)
 
-    # The main function to handle with the game play
+    # The main function to handle with the game play. Making random move for each player and check if there is a winner after every move.
     def play_game(self):
         winner = 0
         counter = 1
 
-        # Play the move for the current player
+        # Play the move for the current player.
         self.board = self.random_place(self.board, self.current_player)
         button = [btn for btn in self.root.ids.grid.children if (btn.i, btn.j) == self.current_loc][0]
         button.text = "X" if self.current_player == 1 else "O"
@@ -162,13 +145,13 @@ class TicTacToeApp(MDApp):
                 player_name = "Player X" if winner == 1 else "Player Y"
                 self.win_list.append(winner)
                 self.update_scoreboard()
-                self.root.ids.status_label.text = f"{player_name} wins! "
+                self.root.ids.status_label.text = f"{player_name} wins!"
             return
 
-        # Switch to the other player
-        self.current_player = 3 - self.current_player  # This will toggle between 1 and 2
+        # Switch to the other player.
+        self.current_player = 3 - self.current_player  # This will toggle between 1 and 2.
 
-        Clock.schedule_once(lambda dt: self.play_game(), 2)
+        Clock.schedule_once(lambda dt: self.play_game(), 2)  # Set initialization time.
 
     # Randomly chooses an unoccupied location on the board for the current player's mark.
     def random_place(self, board, player):
@@ -177,6 +160,7 @@ class TicTacToeApp(MDApp):
         board[self.current_loc] = player
         return board
 
+    # The possibilities() function selects a random place for the player and returns the board.
     def possibilities(self, board):
         l = []
         for i in range(len(board)):
@@ -185,6 +169,7 @@ class TicTacToeApp(MDApp):
                     l.append((i, j))
         return l
 
+    # Finally, determines whether there is a winner or tie based on the results of the row_win(), col_win(), and diag_win() functions.
     def Winner(self, board):
         winner = 0
         for player in [1, 2]:
@@ -201,7 +186,8 @@ class TicTacToeApp(MDApp):
             winner = -1
         return winner
 
-    # Check for winning conditions
+    # The row_win(), col_win(), and diag_win() functions check whether the player has three of their marks in a horizontal row, vertical row, or diagonal row, respectively
+    # If so, they return True and win is set to that player. If not, they continue checking until either one of these conditions is met.
     def row_win(self, board, player):
         for x in range(len(board)):
             win = True
@@ -230,19 +216,21 @@ class TicTacToeApp(MDApp):
             if board[x, x] != player:
                 win = False
         if win:
-            return "main"  # Main diagonal win
+            return "main"  # Main diagonal win.
         win = True
         for x in range(len(board)):
             y = len(board) - 1 - x
             if board[x, y] != player:
                 win = False
         if win:
-            return "counter"  # Counter diagonal win
+            return "counter"  # Counter diagonal win.
         return None
 
+    # `restart_game`: call `new_game` function to reset the game.
     def restart_game(self):
         self.new_game()
 
+    # Update the score of each layout for the app layout.
     def update_scoreboard(self):
         pX_wins = self.win_list.count(1)
         pY_wins = self.win_list.count(2)
@@ -250,11 +238,12 @@ class TicTacToeApp(MDApp):
         self.root.ids.p2_score.text = f"Player Y: {pY_wins}"
         self.root.ids.combined_score.text = f" {pX_wins} - {pY_wins}"
 
+    # Highlighting color for  the winning cells.
     def highlight_win(self, win_type, index):
         if win_type == "row":
             for y in range(len(self.board)):
                 btn = [btn for btn in self.root.ids.grid.children if (btn.i, btn.j) == (index, y)][0]
-                btn.md_bg_color = (1, 0, 0, 1)  # red color
+                btn.md_bg_color = (1, 0, 0, 1)  # Color to highlight sequence grid after there is a winner.
         elif win_type == "col":
             for x in range(len(self.board)):
                 btn = [btn for btn in self.root.ids.grid.children if (btn.i, btn.j) == (x, index)][0]
@@ -271,5 +260,6 @@ class TicTacToeApp(MDApp):
                     btn.md_bg_color = (1, 0, 0, 1)
 
 
+# Run the game
 if __name__ == "__main__":
     TicTacToeApp().run()
